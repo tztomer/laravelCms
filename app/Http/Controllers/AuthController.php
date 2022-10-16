@@ -44,7 +44,7 @@ class AuthController extends Controller
     {
         $credentials = $request->validate([
             'email' => 'required|email|string|exists:users,email',
-            'password' => ['required',],
+            'password' => ['required', ],
             'remember' => 'boolean'
 
         ]);
@@ -67,15 +67,19 @@ class AuthController extends Controller
 
 
 
-   public function logout()
+    public function logout()
     {
-       
+
         $user = Auth::user();
         // Revoke the token that was used to authenticate the current request...
-       $user->currentAccessToken()->delete();
+        $user->currentAccessToken()->delete();
 
         return response([
             'success' => true
+
+
+
         ]);
     }
-};
+}
+;
