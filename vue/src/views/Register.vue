@@ -25,7 +25,7 @@
 	</div>
 	<form
 		class="mt-8 space-y-6"
-		@submit.prevent="onFormSubmit()"
+		@submit.prevent="register()"
 	>
 		<input
 			type="hidden"
@@ -147,10 +147,10 @@
 
 <script setup>
 	import { LockClosedIcon } from '@heroicons/vue/20/solid';
-	import { CheckIcon } from '@heroicons/vue/20/solid';
-	// import { ref, onMounted } from 'vue';
+
 	import { store } from '../store/store.js';
 	import { useRouter } from 'vue-router';
+
 	const router = useRouter();
 	const user = {
 		name: '',
@@ -159,13 +159,17 @@
 		password_confirmation: '',
 	};
 
-	function onFormSubmit() {
-		store
-			.dispatch('register', user)
-			.then(() => {
-				router.push({
-					name: 'Dashboard',
-				});
+	async function register() {
+		try {
+			await store.dispatch(
+				'register',
+				user,
+			);
+			router.push({
+				name: 'Dashboard',
 			});
+		} catch (error) {
+			throw error;
+		}
 	}
 </script>

@@ -1,12 +1,8 @@
-import {
-	createRouter,
-	createWebHashHistory,
-	createWebHistory,
-} from 'vue-router';
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router';
 
 import Dashboard from './views/Dashboard.vue';
-// import Project from './views/Project.vue';
-// import ProjectCreate from './views/ProjectCreate.vue';
+import Project from './views/Project.vue';
+import ProjectCreate from './views/ProjectCreate.vue';
 import Login from './views/Login.vue';
 import Register from './views/Register.vue';
 import AuthLayout from './cmps/AuthLayout.vue';
@@ -67,15 +63,9 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-	if (
-		to.meta.requiresAuth &&
-		!store.getters.getToken
-	) {
+	if (to.meta.requiresAuth && !store.getters.getToken) {
 		next({ name: 'Login' });
-	} else if (
-		store.getters.getToken &&
-		to.meta.isGuest
-	) {
+	} else if (store.getters.getToken && to.meta.isGuest) {
 		next({ name: 'Dashboard' });
 	} else {
 		next();

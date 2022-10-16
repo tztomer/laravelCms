@@ -1,6 +1,5 @@
 <template>
 	<div>
-		{{ userStore }}
 		<img
 			class="mx-auto h-12 w-auto"
 			src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
@@ -24,15 +23,17 @@
 			</router-link>
 		</p>
 	</div>
+	<div
+		class="bg-red-800 group relative flex w-full justify-center border-transparent py-4 px-4 text-sm font-medium text-white"
+		v-show="errMsg"
+	>
+		{{ errMsg }}
+	</div>
+
 	<form
 		class="mt-8 space-y-6"
-		@submit.prevent="onFormSubmit()"
+		@submit.prevent="login"
 	>
-		<input
-			type="hidden"
-			name="remember"
-			value="true"
-		/>
 		<div
 			class="-space-y-px rounded-md shadow-sm"
 		>
@@ -44,7 +45,7 @@
 				>
 				<input
 					id="email-address"
-					v-model="form.email"
+					v-model="user.email"
 					type="email"
 					autocomplete="email"
 					required=""
@@ -62,10 +63,9 @@
 					id="password"
 					name="password"
 					type="password"
-					v-model="form.password"
+					v-model="user.password"
 					autocomplete="current-password"
-					required="true"
-					:oninvalid="form.valid"
+					required=""
 					class="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
 					placeholder="Password"
 				/>
@@ -78,8 +78,8 @@
 			<div class="flex items-center">
 				<input
 					id="remember-me"
-					name="remember-me"
-					v-model="form.checked"
+					v-model="user.remember"
+					type="checkbox"
 					class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
 				/>
 				<label
@@ -92,8 +92,6 @@
 
 		<div>
 			<button
-				@click="validation($event)"
-				type="submit"
 				class="group relative flex w-full justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 			>
 				<span
@@ -104,47 +102,46 @@
 						aria-hidden="true"
 					/>
 				</span>
-				Sign in
+				Login
 			</button>
 		</div>
 	</form>
 </template>
 
-<script>
-	export default {
-		data() {
-			return {
-				form: {
-					email: '',
-					password: '',
-					checked: true,
-					valid: false,
-				},
-			};
-		},
-		methods: {
-			onFormSubmit() {
-				const newForm = JSON.parse(
-					JSON.stringify(this.form),
-				);
-				this.form.valid = true;
-				if (this.form.valid === true) {
-					console.log('kasldfjdsl;');
-				}
-			},
-			validation($event) {
-				console.log('btn', $event);
-			},
-		},
-		computed: {
-			userStore() {
-				return this.$store.getters
-					.getToken;
-			},
-		},
-	};
-</script>
 <script setup>
 	import { LockClosedIcon } from '@heroicons/vue/20/solid';
-	import { ref, onMounted } from 'vue';
+
+	import { ref } from 'vue';
+	import { store } from '../store/store.js';
+	import { useRouter } from 'vue-router';
+
+	const errMsg = ref();
+	const router = useRouter();
+	const user = {
+		email: '',
+		password: '',
+		remember: false,
+	};
+
+	async function login() {
+		try {
+			await store.dispatch(
+				'login',
+				user,
+			);
+			router.push({
+				name: 'Dashboard',
+			});
+		} catch ({ response }) {
+			console.log('res', response);
+
+			errMsg.value =
+				response.data.error;
+
+			setTimeout(() => {
+				errMsg.value = false;
+			}, 3000);
+			throw response;
+		}
+	}
 </script>
