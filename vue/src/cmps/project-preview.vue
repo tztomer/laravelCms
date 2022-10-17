@@ -8,7 +8,7 @@
 			}}</span>
 			<img
 				class="w-full h-48 object-cover"
-				:src="project.image"
+				:src="project.img"
 			/>
 		</div>
 		<div class="details_sec">
@@ -27,7 +27,9 @@
 				>
 			</div>
 			<div class="website">
-				<a class="flex items-center decoration-solid text-blue-600 visited:text-purple-600"
+				<a
+					:href="project.url"
+					class="flex items-center decoration-solid text-blue-600 visited:text-purple-600"
 					>Website
 					<span><LinkIcon class="h-4 w-4 text-indigo-500 group-hover:text-indigo-400" /></span>
 				</a>
