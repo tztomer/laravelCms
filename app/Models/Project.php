@@ -4,19 +4,23 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Sluggable\SlugOptions;
-
 use Spatie\Sluggable\HasSlug;
-
+use Spatie\Sluggable\SlugOptions;
 
 class Project extends Model
 {
     use HasFactory, HasSlug;
 
-    protected $fillable = ['user_id', 'title', 'slug', 'status', 'desc', 'expire_date'];
+
+
+    protected $fillable = ['user_id', 'title', 'slug', 'status', 'desc', 'url', 'expire_date', 'img'];
 
     public function getSlugOptions(): SlugOptions
     {
-        return SlugOptions::create()->generateSlugFrom('title')->saveSlugsTo('slug');
+        return SlugOptions::create()
+            ->generateSlugsFrom('title')
+            ->saveSlugsTo('slug');
     }
+
+
 }

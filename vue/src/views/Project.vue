@@ -3,17 +3,26 @@
 		<template v-slot:header>
 			<div class="flex justify-between items-center">
 				<h1 class="text-3xl font-bold tracking-tight text-gray-900">
-					{{ model.id ? model.title : 'Create Project' }}
+					{{ Route.params.id ? model.title : 'Create Project' }}
 				</h1>
 			</div>
 		</template>
-		<template v-slot:content>
-			<pre>{{ model }}</pre>
 
-			<div>
+		<template v-slot:content>
+			<div
+				v-if="loading"
+				class="loading text-3xl bg-black text-gray-100 left-0 absolute w-full h-full"
+			>
+				<div class="flex h-full justify-center items-center">
+					{{ 'loading...' }}
+				</div>
+			</div>
+
+			<div v-else>
+				<pre>{{ model }}</pre>
 				<div class="md:grid md:grid-cols-3 md:gap-6">
 					<div class="mt-5 md:col-span-2 md:mt-0">
-						<form @click.prevent="saveProject">
+						<form @submit.prevent="saveProject">
 							<div class="shadow sm:overflow-hidden sm:rounded-md">
 								<div class="space-y-6 bg-white px-4 py-5 sm:p-6">
 									<div class="grid grid-cols-3 gap-6">
@@ -64,12 +73,12 @@
 											>Project Status</label
 										>
 										<div class="mt-1 flex rounded-md shadow-sm">
+											<!-- <pre>{{ model.status }}</pre> -->
 											<select
 												v-model="model.status"
 												name="status"
 												class="block w-full flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
 											>
-												<option :value="model.status">{{ model.status }}</option>
 												<option>Active</option>
 												<option>Done</option>
 												<option>Cancel</option>
@@ -100,7 +109,7 @@
 										>
 										<div class="mt-1 flex rounded-md shadow-sm">
 											<input
-												:value="model.expire_date"
+												v-model="model.expire_date"
 												type="date"
 												name="expire_date"
 												class="block w-full flex-1 rounded-none rounded-r-md border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
@@ -109,50 +118,42 @@
 									</div>
 
 									<div>
-										<label class="block text-sm font-medium text-gray-700">Cover photo</label>
-										<div
-											class="mt-1 flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6"
-										>
-											<div class="space-y-1 text-center">
-												<div class="">
-													<svg
-														v-if="!model.img"
-														class="mx-auto h-12 w-12 text-gray-400"
-														stroke="currentColor"
-														fill="none"
-														viewBox="0 0 48 48"
-														aria-hidden="true"
-													>
-														<path
-															d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-															stroke-width="2"
-															stroke-linecap="round"
-															stroke-linejoin="round"
-														/>
-													</svg>
-													<img
-														v-else
-														:src="model.img"
-														class="w-64 h-48 object-cover"
+										<label class="block text-sm font-medium text-gray-700"> Image </label>
+										<div class="mt-1 flex items-center">
+											<img
+												v-if="model.img_url"
+												:src="model.img_url"
+												:alt="model.title"
+												class="w-64 h-48 object-cover"
+											/>
+											<span
+												v-else
+												class="flex items-center justify-center h-12 w-12 rounded-full overflow-hidden bg-gray-100"
+											>
+												<svg
+													xmlns="http://www.w3.org/2000/svg"
+													class="h-[80%] w-[80%] text-gray-300"
+													viewBox="0 0 20 20"
+													fill="currentColor"
+												>
+													<path
+														fill-rule="evenodd"
+														d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+														clip-rule="evenodd"
 													/>
-												</div>
-												<div class="flex text-sm text-gray-600">
-													<label
-														for="file-upload"
-														class="relative cursor-pointer rounded-md bg-white font-medium text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:text-indigo-500"
-													>
-														<span>Upload a file</span>
-														<input
-															id="file-upload"
-															name="file-upload"
-															type="file"
-															class="sr-only"
-														/>
-													</label>
-													<p class="pl-1">or drag and drop</p>
-												</div>
-												<p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-											</div>
+												</svg>
+											</span>
+											<button
+												type="button"
+												class="relative overflow-hidden ml-5 bg-white py-2 px-3 border border-gray-300 rounded-md shadow-sm text-sm leading-4 font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+											>
+												<input
+													type="file"
+													@change="onImageChoose"
+													class="absolute left-0 top-0 right-0 bottom-0 opacity-0 cursor-pointer"
+												/>
+												Change
+											</button>
 										</div>
 									</div>
 									<div class="px-4 py-3 sm:px-6">
@@ -164,7 +165,7 @@
 										</button>
 									</div>
 									<div
-										v-if="!model.comments.length"
+										v-if="!model.comments?.length"
 										class="text-center text-gray-600"
 									>
 										You don't have any comments created
@@ -203,34 +204,60 @@
 <script setup>
 	import PageLayout from '../cmps/pageLayout.vue';
 	import addComments from '../cmps/add-comments.vue';
-	import { ref } from 'vue';
+	import { ref, watchEffect, watch, computed } from 'vue';
 	import { store } from '../store/store.js';
-	import { useRoute } from 'vue-router';
-	const router = useRoute();
+	import { useRoute, useRouter } from 'vue-router';
+
+	const Router = useRouter();
+	const Route = useRoute();
 	const model = ref({
-		title: '',
-		image: null,
-		desc: '',
-		web_url: '',
-		status: '',
+		title: null,
+		desc: null,
+		url: null,
+		img_url: null,
+		status: 'Active',
 		expire_date: null,
 		comments: [],
+		slug: null,
 	});
 
-	const options = ref([
-		{ text: 'Done', value: 'done' },
-		{ text: 'Cancel', value: 'cancel' },
-		{ text: 'Done', value: 'done' },
-	]);
+	const loading = computed(() => store.getters.projectLoading);
 
-	if (router.params.id) {
-		console.log('router', router.params.id);
-		const { id } = router.params;
+	watchEffect(() => {
+		const data = store.getters.getProject;
+		console.log('data from watch', data);
+
+		model.value = data;
+	});
+
+	// 	watch(
+	//   () => store.state.currentSurvey.data,
+	//   (newVal, oldVal) => {
+	//     model.value = {
+	//       ...JSON.parse(JSON.stringify(newVal)),
+	//       status: !!newVal.status,
+	//     };
+	//   }
+	// );
+
+	if (Route.params.id) {
+		const { id } = Route.params;
+		console.log('project id from project page', id);
 		(async function () {
 			await store.dispatch('getProject', +id);
-			model.value = store.getters.getProject;
-			console.log('model', model.value);
 		})();
+	}
+
+	function onImageChoose(ev) {
+		// console.log(ev.target.files[0]);
+		const file = ev.target.files[0];
+		const reader = new FileReader();
+		reader.onload = () => {
+			console.log('reader res', reader.result);
+			model.value.img = reader.result;
+			model.value.img_url = reader.result;
+		};
+		reader.readAsDataURL(file);
 	}
 
 	function addComment(index) {
@@ -258,12 +285,14 @@
 			if (comm.id === comment.id) {
 				return JSON.parse(JSON.stringify(comment));
 			}
-			return comm;
+			// return comm;
 		});
+	}
+	async function saveProject() {
+		await store.dispatch('saveProject', model.value);
 
-		async function saveProject() {
-			const data = await store.dispatch('saveProject', model.value);
-			router.push({ name: 'Project', params: { id: data.data.id } });
-		}
+		Router.push({ name: 'Projects' });
+		// console.log('data project page', data);
+		// console.log('router', router.params);
 	}
 </script>

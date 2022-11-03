@@ -8,7 +8,7 @@
 			}}</span>
 			<img
 				class="w-full h-48 object-cover"
-				:src="project.img"
+				:src="project.img_url"
 			/>
 		</div>
 		<div class="details_sec">
@@ -17,9 +17,9 @@
 				<span>Project Status: </span>
 				<span
 					:class="[
-						project.status === 'active'
+						project.status === 'Active'
 							? 'text-blue-700'
-							: project.status === 'done'
+							: project.status === 'Done'
 							? 'text-green-700'
 							: 'text-red-700',
 					]"

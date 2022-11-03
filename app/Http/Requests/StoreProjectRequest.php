@@ -3,6 +3,11 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Project;
+
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class StoreProjectRequest extends FormRequest
 {
@@ -18,7 +23,9 @@ class StoreProjectRequest extends FormRequest
 
     protected function prepareForValidation()
     {
-        $this->merge(['user_id' => $this->user()->id]);
+        $this->merge([
+            'user_id' => $this->user()->id
+        ]);
     }
     /**
      * Get the validation rules that apply to the request.
@@ -28,12 +35,15 @@ class StoreProjectRequest extends FormRequest
     public function rules()
     {
         return [
-            "title" => "require|string|max:100",
+            "title" => "required|string|max:100",
             "user_id" => 'exists:users,id',
             "desc" => "nullable|string",
-            "url" => "require|string",
-            "status" => "require|string",
+            "url" => "required|string",
+            "slug" => 'nullable|string',
+            "status" => "required|string",
+            "img" => 'nullable|string',
             "expire_date" => 'nullable|date|after:tomorrow',
+            'comments' => 'array',
 
 
         ];

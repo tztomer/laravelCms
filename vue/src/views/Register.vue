@@ -151,7 +151,7 @@
 
 	async function register() {
 		try {
-			await store.dispatch('register', user);
+			await store.dispatch('register', user.value);
 			router.push({
 				name: 'Dashboard',
 			});

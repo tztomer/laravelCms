@@ -6,8 +6,7 @@ const userStore = {
 		test: 'test',
 		user: {
 			data: {},
-			token:
-				sessionStorage.getItem('TOKEN'),
+			token: sessionStorage.getItem('TOKEN'),
 		},
 	},
 	getters: {
@@ -25,45 +24,33 @@ const userStore = {
 	mutations: {
 		logout({ user }) {
 			console.log('im in mutation');
-			(user.data = {}),
-				(user.token = null);
-			sessionStorage.removeItem(
-				'TOKEN',
-			);
+			(user.data = {}), (user.token = null);
+			sessionStorage.removeItem('TOKEN');
 		},
 		setUser(state, userData) {
-			console.log(
-				'data from mutation',
-				userData,
-			);
+			console.log('data from mutation', userData);
 			state.user.data = userData.user;
 			state.user.token = userData.token;
-			sessionStorage.setItem(
-				'TOKEN',
-				userData.token,
-			);
+			sessionStorage.setItem('TOKEN', userData.token);
 		},
 	},
 	actions: {
 		async register({ commit }, user) {
-			const { data } =
-				await axiosClint.post(
-					'/register',
-					user,
-				);
+			try {
+				const { data } = await axiosClint.post('/register', user);
 
-			commit('setUser', data);
-			return data;
+				commit('setUser', data);
+				return data;
+			} catch (error) {
+				console.log('err action register', error);
+			}
 		},
 		async login({ commit }, user) {
 			console.log('data', user);
 			try {
-				const { data } =
-					await axiosClint.post(
-						'/login',
-						user,
-					);
-
+				const { data } = await axiosClint.post('/login', user);
+				console.log('data', data);
+				console.log('user', user);
 				commit('setUser', data);
 				return data;
 			} catch (error) {
@@ -72,9 +59,7 @@ const userStore = {
 		},
 		async logout({ commit }) {
 			try {
-				await axiosClint.post(
-					'/logout',
-				);
+				await axiosClint.post('/logout');
 
 				commit('logout');
 			} catch (error) {

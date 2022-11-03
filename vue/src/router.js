@@ -2,11 +2,11 @@ import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router
 
 import Dashboard from './views/Dashboard.vue';
 import Project from './views/Project.vue';
-import ProjectView from './views/ProjectView.vue';
+
 import Login from './views/Login.vue';
 import Register from './views/Register.vue';
 import AuthLayout from './cmps/AuthLayout.vue';
-import NotFound from './views/NotFound.vue';
+// import NotFound from './views/NotFound.vue';
 import DefaultLayout from './cmps/DefaultLayout.vue';
 import Projects from './views/Projects.vue';
 import { store } from './store/store.js';
@@ -38,12 +38,6 @@ const routes = [
 				path: '/projects/:id',
 				name: 'ProjectEdit',
 				component: Project,
-			},
-			{
-				path: '/projects/:slug',
-				name: 'ProjectView',
-				component: ProjectView,
-				props: true,
 			},
 		],
 	},

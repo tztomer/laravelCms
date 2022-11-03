@@ -2,11 +2,20 @@
 
 namespace App\Http\Controllers;
 
+// use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
+
+
 use Illuminate\Http\Request;
+// use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\File;
+// use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
+
+// use Illuminate\Validation\Rule;
 
 class ProjectController extends Controller
 {
@@ -18,8 +27,10 @@ class ProjectController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        return ProjectResource::collection(Project::where('user_id', $user->id)->paginate());
+
+        return ProjectResource::collection(Project::where('user_id', $user->id)->orderBy('created_at', 'DESC')->paginate(10));
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -30,8 +41,16 @@ class ProjectController extends Controller
     public function store(StoreProjectRequest $request)
     {
         //
-        $result = Project::create($request->validate());
-        return new ProjectResource($result);
+        $data = $request->validated();
+
+        if (isset($data['img'])) {
+            $relativePath = $this->saveImage($data['img']);
+            $data['img'] = $relativePath;
+        }
+
+
+        $project = Project::create($data);
+        return new ProjectResource($project);
     }
 
     /**
@@ -44,8 +63,9 @@ class ProjectController extends Controller
     {
         $user = $request->user();
         if ($user->id !== $project->user_id) {
-            return abort(403, 'Unauthorized action');
+            return abort(403, 'Unauthorized action.');
         }
+
         return new ProjectResource($project);
     }
 
@@ -58,8 +78,32 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        $project->update($request->validated());
+        $data = $request->validated();
+
+
+
+        if (isset($data['img'])) {
+            $relativePath = $this->saveImage($data['img']);
+
+
+
+            $data['img'] = $relativePath;
+
+
+
+            // var_dump($project->img);
+
+            if ($project->img) {
+                $absolutePath = public_path($project->img);
+                File::delete($absolutePath);
+            }
+        }
+
+
+
+        $project->update($data);
         return new ProjectResource($project);
+
     }
 
     /**
@@ -72,9 +116,52 @@ class ProjectController extends Controller
     {
         $user = $request->user();
         if ($user->id !== $project->user_id) {
-            return abort(403, 'Unauthorized action');
+            return abort(403, 'Unauthorized action.');
         }
+
         $project->delete();
+
+        // If there is an old image, delete it
+        if ($project->img) {
+            $absolutePath = public_path($project->img);
+            File::delete($absolutePath);
+        }
+
         return response('', 204);
+    }
+
+    private function saveImage($image)
+    {
+        // Check if image is valid base64 string
+        if (preg_match('/^data:image\/(\w+);base64,/', $image, $type)) {
+            // Take out the base64 encoded text without mime type
+            $image = substr($image, strpos($image, ',') + 1);
+            // Get file extension
+            $type = strtolower($type[1]); // jpg, png, gif
+
+            // Check if file is an image
+            if (!in_array($type, ['jpg', 'jpeg', 'gif', 'png'])) {
+                throw new \Exception('invalid image type');
+            }
+            $image = str_replace(' ', '+', $image);
+            $image = base64_decode($image);
+
+            if ($image === false) {
+                throw new \Exception('base64_decode failed');
+            }
+        } else {
+            throw new \Exception('did not match data URI with image data');
+        }
+
+        $dir = 'images/';
+        $file = Str::random() . '.' . $type;
+        $absolutePath = public_path($dir);
+        $relativePath = $dir . $file;
+        if (!File::exists($absolutePath)) {
+            File::makeDirectory($absolutePath, 0755, true);
+        }
+        file_put_contents($relativePath, $image);
+
+        return $relativePath;
     }
 }
