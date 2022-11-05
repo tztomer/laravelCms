@@ -34,11 +34,10 @@
 	import { computed } from 'vue';
 
 	const projects = computed(() => {
-		// (async () => {
-		// Code that runs in your function
-		// const projects = await store.dispatch('getProjects');
-		// })();
-
 		return store.getters.getProjects;
 	});
+	(async () => {
+		// Code that runs in your function
+		await store.dispatch('getProjects');
+	})();
 </script>

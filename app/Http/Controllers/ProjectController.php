@@ -7,15 +7,17 @@ use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Http\Resources\ProjectResource;
 use App\Models\Project;
+use App\Models\Comment;
 
 
 use Illuminate\Http\Request;
 // use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
-// use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
-// use Illuminate\Validation\Rule;
+
+use Illuminate\Validation\Rule;
 
 class ProjectController extends Controller
 {
@@ -48,8 +50,16 @@ class ProjectController extends Controller
             $data['img'] = $relativePath;
         }
 
-
         $project = Project::create($data);
+
+
+        // foreach ($data['comments'] as $comment) {
+        //     $comment['project_id'] = $project->id;
+        //     $this->createComment($comment);
+        // }
+
+
+
         return new ProjectResource($project);
     }
 
@@ -164,4 +174,20 @@ class ProjectController extends Controller
 
         return $relativePath;
     }
+
+// private function createComment($data){
+
+// //  $comment =  Comment::create([]);
+
+//    $validator = Validator::make($data,[
+//         'content'=> $data['comment'],
+//         ''
+//    ])
+// }
 }
+
+//  $surveyAnswer = SurveyAnswer::create([
+//             'survey_id' => $survey->id,
+//             'start_date' => date('Y-m-d H:i:s'),
+//             'end_date' => date('Y-m-d H:i:s'),
+//         ]);

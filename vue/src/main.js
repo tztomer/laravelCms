@@ -1,7 +1,7 @@
 import { createApp } from 'vue';
 
 import { store } from './store/store.js';
-// import "./main.scss";
+
 import './styles/main.scss';
 import './styles/input.css';
 

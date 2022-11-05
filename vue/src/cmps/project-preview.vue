@@ -73,6 +73,6 @@
 	});
 	const deleteProject = async function (id) {
 		// delete project
-		await store.dispatch('removeProject', id);
+		await store.dispatch('deleteProject', id);
 	};
 </script>

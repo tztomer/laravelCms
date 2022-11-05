@@ -3,6 +3,7 @@
 		<!-- <app-header class="header" /> -->
 
 		<router-view />
+
 		<app-footer />
 	</section>
 </template>
@@ -11,7 +12,6 @@
 	import appHeader from './cmps/app-header.vue';
 	import DefaultLayout from './cmps/DefaultLayout.vue';
 	import appFooter from './cmps/app-footer.vue';
-	// import { userService } from './services/user.service'
 
 	export default {
 		data() {

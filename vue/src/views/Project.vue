@@ -5,6 +5,21 @@
 				<h1 class="text-3xl font-bold tracking-tight text-gray-900">
 					{{ Route.params.id ? model.title : 'Create Project' }}
 				</h1>
+				<button
+					@click.prevent="deleteProject()"
+					v-show="Route.params.id"
+					type="button"
+					class="py-2 px-3 text-white bg-red-500 rounded-md hover:bg-red-700"
+				>
+					Delete Project <TrashIcon class="h-5 w-5 -mt-1 inline-block" />
+				</button>
+				<popupMsg
+					@discard="deleteProject"
+					@confirm="deleteProject"
+					v-if="isClicked"
+				>
+					<template v-slot:popupContent>Do you sure you want to delete this project?</template>
+				</popupMsg>
 			</div>
 		</template>
 
@@ -204,10 +219,14 @@
 <script setup>
 	import PageLayout from '../cmps/pageLayout.vue';
 	import addComments from '../cmps/add-comments.vue';
-	import { ref, watchEffect, watch, computed } from 'vue';
+	import popupMsg from '../cmps/user-msg.cmp.vue';
+
+	import { ref, watchEffect, computed } from 'vue';
 	import { store } from '../store/store.js';
 	import { useRoute, useRouter } from 'vue-router';
+	import { TrashIcon } from '@heroicons/vue/20/solid';
 
+	// const emit = defineEmits(['show-msg']);
 	const Router = useRouter();
 	const Route = useRoute();
 	const model = ref({
@@ -223,28 +242,21 @@
 
 	const loading = computed(() => store.getters.projectLoading);
 
-	watchEffect(() => {
-		const data = store.getters.getProject;
-		console.log('data from watch', data);
-
-		model.value = data;
-	});
-
-	// 	watch(
-	//   () => store.state.currentSurvey.data,
-	//   (newVal, oldVal) => {
-	//     model.value = {
-	//       ...JSON.parse(JSON.stringify(newVal)),
-	//       status: !!newVal.status,
-	//     };
-	//   }
-	// );
+	watchEffect(
+		() => store.getters.getProject,
+		(newVal, oldVal) => {
+			model.value = {
+				...JSON.parse(JSON.stringify(newVal)),
+			};
+		},
+	);
 
 	if (Route.params.id) {
 		const { id } = Route.params;
 		console.log('project id from project page', id);
 		(async function () {
 			await store.dispatch('getProject', +id);
+			return (model.value = store.getters.getProject);
 		})();
 	}
 
@@ -253,26 +265,25 @@
 		const file = ev.target.files[0];
 		const reader = new FileReader();
 		reader.onload = () => {
-			console.log('reader res', reader.result);
 			model.value.img = reader.result;
 			model.value.img_url = reader.result;
 		};
 		reader.readAsDataURL(file);
 	}
 
-	function addComment(index) {
+	function addComment() {
 		const newComment = {
 			id: Date.now(),
 			type: 'text',
 			comment: null,
 		};
-		console.log('index', index);
+
 		model.value.comments.push(newComment);
 		return;
 	}
 
 	function saveComment(comment) {
-		console.log('comment', comment);
+		// console.log('comment', comment);
 		model.value.comments.slice(comment);
 	}
 
@@ -285,7 +296,6 @@
 			if (comm.id === comment.id) {
 				return JSON.parse(JSON.stringify(comment));
 			}
-			// return comm;
 		});
 	}
 	async function saveProject() {
@@ -294,5 +304,20 @@
 		Router.push({ name: 'Projects' });
 		// console.log('data project page', data);
 		// console.log('router', router.params);
+	}
+	const isClicked = ref(false);
+
+	async function deleteProject(btn) {
+		isClicked.value = true;
+
+		if (btn === 'confirm') {
+			console.log('dispatch store delete');
+			const status = await store.dispatch('deleteProject', model.value.id);
+			console.log('status code', typeof status, status);
+			if (status === 204) Router.push({ name: 'Projects' });
+		} else if (btn === 'discard') {
+			isClicked.value = false;
+		}
+		console.log('project btn func', isClicked.value);
 	}
 </script>
