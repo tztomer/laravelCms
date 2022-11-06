@@ -18,9 +18,17 @@ class Project extends Model
     public function getSlugOptions(): SlugOptions
     {
         return SlugOptions::create()
-            ->generateSlugsFrom('title')
-            ->saveSlugsTo('slug');
+            ->generateSlugsFrom(
+                'title'
+            )
+            ->saveSlugsTo(
+                'slug'
+            );
     }
 
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
 
 }

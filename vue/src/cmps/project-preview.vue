@@ -43,7 +43,7 @@
 					class="bg-slate-100 shadow-md rounded-sm text-xs p-3"
 					v-if="i <= 0"
 				>
-					{{ comment.comment.split(' ').slice(0, 7).join('  ') + ' ...' }}
+					{{ comment.comment ?? 'yes is null' }}
 				</div>
 			</div>
 		</div>

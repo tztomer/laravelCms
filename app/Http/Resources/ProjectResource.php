@@ -26,7 +26,7 @@ class ProjectResource extends JsonResource
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'expire_date' => (new \DateTime($this->expire_date))->format('Y-m-d'),
-            'comments' => []
+            'comments' => $this->comments,
 
 
 

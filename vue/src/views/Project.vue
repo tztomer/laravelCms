@@ -190,6 +190,7 @@
 										v-for="(comment, index) in model.comments"
 										:key="comment.id"
 									>
+										{{ ('comment id', comment.id) }}
 										<addComments
 											:comment="comment"
 											:index="index"
@@ -279,12 +280,12 @@
 		};
 
 		model.value.comments.push(newComment);
-		return;
 	}
 
-	function saveComment(comment) {
-		// console.log('comment', comment);
-		model.value.comments.slice(comment);
+	function saveComment(index, comment) {
+		console.log('comment 1', comment);
+		model.value.comments.splice(index, 1, comment);
+		console.log('module comments', model.value.comments);
 	}
 
 	function deleteComment(comment) {
@@ -292,10 +293,11 @@
 	}
 
 	function commentChange(comment) {
-		model.value.comments = model.value.comments.map((comm) => {
-			if (comm.id === comment.id) {
+		model.value.comments = model.value.comments.map((c) => {
+			if (c.id === comment.id) {
 				return JSON.parse(JSON.stringify(comment));
 			}
+			return c;
 		});
 	}
 	async function saveProject() {

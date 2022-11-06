@@ -4,7 +4,6 @@
 			<textarea
 				:name="'comment_' + model.id"
 				v-model="model.comment"
-				@focus="dataChange"
 				@change="dataChange"
 				:id="'comment_' + model.id"
 				:class="[
@@ -51,7 +50,8 @@
 	// 	return;
 	// }
 	function saveComment() {
-		emit('saveComment', props.comment);
+		const data = model.value;
+		emit('saveComment', props.index, data);
 		isShow.value = false;
 	}
 
