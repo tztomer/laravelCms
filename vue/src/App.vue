@@ -4,7 +4,7 @@
 
 		<router-view />
 
-		<app-footer />
+		<!-- <app-footer /> -->
 	</section>
 </template>
 

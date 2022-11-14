@@ -1,0 +1,11 @@
+.alert {
+    right: 0.5em;
+    padding: 1em;
+    &.alert-success {
+        background-color: rgb(2, 2, 7);
+    }
+    &.alert-error {
+        background-color: rgb(246, 4, 4);
+        white-space: break-spaces;
+    }
+}

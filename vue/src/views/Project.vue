@@ -13,13 +13,6 @@
 				>
 					Delete Project <TrashIcon class="h-5 w-5 -mt-1 inline-block" />
 				</button>
-				<popupMsg
-					@discard="deleteProject"
-					@confirm="deleteProject"
-					v-if="isClicked"
-				>
-					<template v-slot:popupContent>Do you sure you want to delete this project?</template>
-				</popupMsg>
 			</div>
 		</template>
 
@@ -37,7 +30,10 @@
 				<pre>{{ model }}</pre>
 				<div class="md:grid md:grid-cols-3 md:gap-6">
 					<div class="mt-5 md:col-span-2 md:mt-0">
-						<form @submit.prevent="saveProject">
+						<form
+							@submit.prevent="saveProject"
+							class="animate-fade-in-down"
+						>
 							<div class="shadow sm:overflow-hidden sm:rounded-md">
 								<div class="space-y-6 bg-white px-4 py-5 sm:p-6">
 									<div class="grid grid-cols-3 gap-6">
@@ -192,6 +188,7 @@
 									>
 										{{ ('comment id', comment.id) }}
 										<addComments
+											class="animate-fade-in-down"
 											:comment="comment"
 											:index="index"
 											@change="commentChange"
@@ -206,7 +203,7 @@
 									<button
 										class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
 									>
-										Save
+										{{ Route.params.id ? 'Update' : 'Save' }}
 									</button>
 								</div>
 							</div>
@@ -220,14 +217,13 @@
 <script setup>
 	import PageLayout from '../cmps/pageLayout.vue';
 	import addComments from '../cmps/add-comments.vue';
-	import popupMsg from '../cmps/user-msg.cmp.vue';
 
 	import { ref, watchEffect, computed } from 'vue';
 	import { store } from '../store/store.js';
 	import { useRoute, useRouter } from 'vue-router';
 	import { TrashIcon } from '@heroicons/vue/20/solid';
+	import { eventBus } from '../event-bus.service.js';
 
-	// const emit = defineEmits(['show-msg']);
 	const Router = useRouter();
 	const Route = useRoute();
 	const model = ref({
@@ -278,7 +274,7 @@
 			type: 'text',
 			comment: null,
 		};
-
+		// eventBus.emit('show-msg', { txt: 'some information', type: 'success', delay: 4000 });
 		model.value.comments.push(newComment);
 	}
 
@@ -301,9 +297,44 @@
 		});
 	}
 	async function saveProject() {
-		await store.dispatch('saveProject', model.value);
+		const data = await store.dispatch('saveProject', model.value);
+		let setDelay = 4000;
+		if (data.status === 200 || data.status === 201) {
+			if (data.config.method === 'put') {
+				eventBus.emit('show-msg', {
+					txt: 'Project updated successfully',
+					type: 'success',
+					delay: setDelay,
+				});
+			} else if (data.config.method === 'post') {
+				eventBus.emit('show-msg', {
+					txt: 'Project saved successfully',
+					type: 'success',
+					delay: setDelay,
+				});
+				setTimeout(() => {
+					Router.push({ name: 'Projects' });
+				}, setDelay * 1.2);
+			}
+		} else {
+			console.log('res data project', data);
+			let strMsg = '';
+			const errorMsg = data.response.data.errors;
 
-		Router.push({ name: 'Projects' });
+			for (const key of Object.entries(errorMsg)) {
+				// console.log('in', index);
+
+				strMsg += key[1].join('') + '\n';
+				console.log('strMsg', strMsg);
+			}
+
+			eventBus.emit('show-msg', {
+				txt: strMsg,
+				type: 'error',
+				delay: 5000,
+			});
+		}
+
 		// console.log('data project page', data);
 		// console.log('router', router.params);
 	}
@@ -313,13 +344,11 @@
 		isClicked.value = true;
 
 		if (btn === 'confirm') {
-			console.log('dispatch store delete');
 			const status = await store.dispatch('deleteProject', model.value.id);
-			console.log('status code', typeof status, status);
+
 			if (status === 204) Router.push({ name: 'Projects' });
 		} else if (btn === 'discard') {
 			isClicked.value = false;
 		}
-		console.log('project btn func', isClicked.value);
 	}
 </script>

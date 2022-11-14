@@ -14,9 +14,11 @@
 
 			<!-- /End replace -->
 		</div>
+		<userMsg class="animate-fade-in-down"></userMsg>
 	</main>
 </template>
 <script setup>
+	import userMsg from '../cmps/user-msg.vue';
 	const props = defineProps({
 		title: String,
 	});

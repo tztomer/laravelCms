@@ -18,7 +18,7 @@ return new class extends Migration {
                 $table->id();
                 $table->text('comment')->nullable();
                 $table->timestamps();
-                $table->foreignIdFor(Project::class, 'project_id')->constrained()->nullable();
+                $table->foreignIdFor(Project::class, 'project_id');
 
 
 

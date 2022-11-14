@@ -5,6 +5,7 @@
 				:name="'comment_' + model.id"
 				v-model="model.comment"
 				@change="dataChange"
+				@focus="dataChange"
 				:id="'comment_' + model.id"
 				:class="[
 					!isShow

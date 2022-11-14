@@ -18,7 +18,7 @@ return new class extends Migration {
                 $table->id();
                 // $table->foreignIdFor(User::class,'id');
                 //  $table->foreignIdFor(Comment::class,'id');
-                $table->foreignIdFor(User::class, 'user_id')->constrained();
+                $table->foreignIdFor(User::class, 'user_id');
                 $table->timestamps();
                 $table->string('title', 1000);
                 $table->string('url', 1000);

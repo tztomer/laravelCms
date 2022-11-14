@@ -52,20 +52,29 @@ const projectStore = {
 		projects: {
 			loading: false,
 			data: [],
+			pages: [],
 		},
 		currentProject: {
 			loading: false,
 			data: {},
 		},
+		notification: {},
 	},
 	getters: {
 		projectLoading({ currentProject }) {
 			console.log('loading getters', currentProject.loading);
 			return currentProject.loading;
 		},
+		projectsLoading({ projects }) {
+			console.log('loading projects', projects.loading);
+			return projects.loading;
+		},
 
 		getProjects({ projects }) {
-			return projects.data;
+			return {
+				list: projects.data,
+				pages: projects.pages,
+			};
 		},
 		getProject({ currentProject }) {
 			return currentProject.data;
@@ -93,8 +102,9 @@ const projectStore = {
 			currentProject.data = data;
 		},
 
-		setProjects({ projects }, { data }) {
-			projects.data = JSON.parse(JSON.stringify(data));
+		setProjects({ projects }, data) {
+			projects.data = data.data;
+			projects.pages = data.meta.links;
 			console.log('projects', projects);
 		},
 	},
@@ -106,7 +116,6 @@ const projectStore = {
 				const { data } = await axiosClint(`/project/${id}`);
 				commit('setProject', data);
 				commit('setLoading', false);
-				console.log('data from get project', data);
 				return data;
 			} catch (error) {
 				commit('setLoading', false);
@@ -114,22 +123,24 @@ const projectStore = {
 			}
 		},
 		async saveProject({ commit }, project) {
-			console.log('save project', project);
 			try {
 				delete project.img_url;
 				if (project.id) {
-					const { data } = await axiosClint.put(`/project/${project.id}`, project);
+					const res = await axiosClint.put(`/project/${project.id}`, project);
+					const { data } = res;
 					commit('setProject', data);
-					console.log('data put', data);
-					return data;
+					// commit('notify', res.config.method);
+
+					return res;
 				} else {
-					const { data } = await axiosClint.post('/project', project);
+					const res = await axiosClint.post('/project', project);
+					const { data } = res;
 					commit('setProject', data);
 					console.log('data new', data);
-					return data;
+					return res;
 				}
 			} catch (error) {
-				console.log('error from action save', error);
+				return error;
 			}
 		},
 		async deleteProject({ commit }, id) {
@@ -143,11 +154,15 @@ const projectStore = {
 				throw error;
 			}
 		},
-		async getProjects({ commit }) {
+		async getProjects({ commit }, url = '/project') {
 			try {
+				console.log('url:::', url);
+				// url = url || '/project';
 				commit('projectsLoading', true);
-				const { data } = await axiosClint.get('/project');
+				const res = await axiosClint.get(url);
 				commit('projectsLoading', false);
+				console.log('res from get projects', res);
+				const { data } = res;
 				commit('setProjects', data);
 				return data;
 			} catch (error) {

@@ -30,7 +30,7 @@ class ProjectController extends Controller
     {
         $user = $request->user();
 
-        return ProjectResource::collection(Project::where('user_id', $user->id)->orderBy('created_at', 'DESC')->paginate(10));
+        return ProjectResource::collection(Project::where('user_id', $user->id)->orderBy('created_at', 'DESC')->paginate(6));
     }
 
 
